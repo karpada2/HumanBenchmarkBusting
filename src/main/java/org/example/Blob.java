@@ -64,6 +64,10 @@ public class Blob {
         return points;
     }
 
+    public static Blob[] getBlobs(boolean[][] data, int minSize) {
+        return getBlobs(data, minSize, true);
+    }
+
     public static Blob[] getBlobs(boolean[][] data, int minSize, boolean orthogonalOnly) {
         ArrayList<Blob> blobs = new ArrayList<>(10);
         boolean[][] visited = new boolean[data.length][data[0].length];

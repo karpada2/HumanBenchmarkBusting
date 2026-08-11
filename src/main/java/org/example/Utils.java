@@ -2,11 +2,14 @@ package org.example;
 
 import org.w3c.dom.css.Rect;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.IOException;
 
 public class Utils {
     static Color startButtonColor = new Color(255, 209, 84);
@@ -22,7 +25,7 @@ public class Utils {
     }
 
     public void setWorkinoArea(Rectangle workinoArea) {
-        this.workinoArea = workinoArea;
+        this.workinoArea = new Rectangle(workinoArea.x + this.workinoArea.x, workinoArea.y + this.workinoArea.y, workinoArea.width, workinoArea.height);
     }
 
     // global (screen) coords
@@ -61,6 +64,42 @@ public class Utils {
 
     public void upM1() {
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+    }
+
+    public static void saveImage(BufferedImage img, String taskName, String fileName) {
+        try {
+            File outFile = new File("/home/electrocaruzo/Pictures/HumanBenchmarkScreenshots/" + taskName + "/", fileName + ".png");
+            outFile.mkdirs();
+
+            ImageIO.write(img, "png", outFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveImage(BufferedImage img, String taskName) {
+        String fileName = "java_img_" + System.currentTimeMillis();
+        saveImage(img, taskName, fileName);
+    }
+
+    public static void showImageNative(BufferedImage img) {
+        try {
+            // Create a temporary file that deletes itself when Java exits
+            File tempFile = File.createTempFile("java_img_", ".png");
+            tempFile.deleteOnExit();
+
+            // Write the buffered image to the temporary file
+            ImageIO.write(img, "png", tempFile);
+
+            // Command the host OS to open the file with its default app
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                System.out.println("Desktop API is not supported on this platform.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Point addPoints(Point p1, Point p2) {
@@ -309,9 +348,11 @@ public class Utils {
     public static BufferedImage drawRectangle(BufferedImage image, Rectangle rectangle) {
         for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
             image.setRGB(x, rectangle.y + rectangle.height, Color.RED.getRGB());
+            image.setRGB(x, rectangle.y, Color.RED.getRGB());
         }
         for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
             image.setRGB(rectangle.x + rectangle.width, y, Color.RED.getRGB());
+            image.setRGB(rectangle.x, y, Color.RED.getRGB());
         }
 
         return image;

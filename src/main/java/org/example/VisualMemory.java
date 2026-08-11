@@ -1,5 +1,7 @@
 package org.example;
 
+import jdk.jshell.execution.Util;
+
 import javax.imageio.ImageIO;
 import javax.tools.Tool;
 import java.awt.*;
@@ -42,37 +44,6 @@ public class VisualMemory extends RunnableSolver {
         new VisualMemory().play();
     }
 
-    public static void saveImage(BufferedImage img) {
-        try {
-            String filename = "java_img_" + System.currentTimeMillis() + ".png";
-            File outFile = new File("/home/electrocaruzo/Pictures/HumanBenchmarkScreenshots/VisualMemory/", filename);
-
-            ImageIO.write(img, "png", outFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void showImageNative(BufferedImage img) {
-        try {
-            // Create a temporary file that deletes itself when Java exits
-            File tempFile = File.createTempFile("java_img_", ".png");
-            tempFile.deleteOnExit();
-
-            // Write the buffered image to the temporary file
-            ImageIO.write(img, "png", tempFile);
-
-            // Command the host OS to open the file with its default app
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(tempFile);
-            } else {
-                System.out.println("Desktop API is not supported on this platform.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     static Color clickSquareColor = new Color(255, 255, 255);
 
     static Color startButtonYellow = new Color(255, 209, 84);
@@ -81,6 +52,8 @@ public class VisualMemory extends RunnableSolver {
     static Color backgroundColor = new Color(43, 135, 209);
 
     Point[] whereToPress = null;
+
+    int lastSize = 0;
 
     static double requiredFillPercentage = 0.95;
 
@@ -99,51 +72,54 @@ public class VisualMemory extends RunnableSolver {
 
         while (isActive()) {
             BufferedImage screenshot = utils.getScreenshot();
-            if (whereToPress == null) {
-                boolean[][] temp = Utils.filterForColor(screenshot, clickSquareColor);
-                boolean[][] eroded = Utils.erode(temp, 2);
-                if (Utils.any(eroded, 50)) {
-                    try {
-                        Blob[] blobs = Blob.getBlobs(eroded, 1, false);
-                        int actualLength = blobs.length;
-                        for (int i = 0; i < blobs.length; i++) {
-                            if (((double) blobs[i].getMass() / (blobs[i].getBoundingBox().height * blobs[i].getBoundingBox().width) < requiredFillPercentage)) {
-                                blobs[i] = null;
-                                actualLength--;
-                            }
-                        }
-                        if (actualLength > 0) {
-                            whereToPress = new Point[actualLength];
-                            int index = 0;
+            if (!Utils.any(Utils.filterForColor(screenshot, startButtonYellow))) {
+                if (whereToPress == null) {
+                    boolean[][] temp = Utils.filterForColor(screenshot, clickSquareColor);
+                    boolean[][] eroded = Utils.erode(temp, 2);
+                    if (Utils.any(eroded, 50)) {
+                        try {
+                            Blob[] blobs = Blob.getBlobs(eroded, 1, false);
+                            int actualLength = blobs.length;
                             for (int i = 0; i < blobs.length; i++) {
-                                if (blobs[i] != null) {
-                                    Utils.drawRectangle(screenshot, blobs[i].getBoundingBox());
-                                    Utils.drawBlob(screenshot, blobs[i]);
-                                    whereToPress[index] = utils.toGlobal(blobs[i].getCenterOfMass());
-                                    index++;
+                                if (((double) blobs[i].getMass() / (blobs[i].getBoundingBox().height * blobs[i].getBoundingBox().width) < requiredFillPercentage)) {
+                                    blobs[i] = null;
+                                    actualLength--;
                                 }
                             }
-                            utils.move(whereToPress[0]);
-                            saveImage(screenshot);
+                            if (actualLength > lastSize) {
+                                whereToPress = new Point[actualLength];
+                                int index = 0;
+                                for (int i = 0; i < blobs.length; i++) {
+                                    if (blobs[i] != null) {
+                                        Utils.drawRectangle(screenshot, blobs[i].getBoundingBox());
+                                        Utils.drawBlob(screenshot, blobs[i]);
+                                        whereToPress[index] = utils.toGlobal(blobs[i].getCenterOfMass());
+                                        index++;
+                                    }
+                                }
+                                lastSize = whereToPress.length;
+                                utils.move(whereToPress[0]);
+                                Utils.saveImage(screenshot, "VisualMemory");
+                            }
+                        }
+                        catch (StackOverflowError e) {
+                            e.printStackTrace();
                         }
                     }
-                    catch (StackOverflowError e) {
-                        e.printStackTrace();
+                }
+                else {
+                    if (!utils.getPixelColorAtCursor().equals(clickSquareColor)) {
+                        for (int i = 0; i <= whereToPress.length; i++) {
+                            utils.move(whereToPress[i%whereToPress.length]);
+                            utils.pressM1();
+                            while (utils.getPixelColorAtCursor().equals(clickSquareColor)) {
+                                robot.delay(10);
+                            }
+                        }
+                        whereToPress = null;
                     }
                 }
             }
-            else {
-                while (utils.getPixelColorAtCursor().equals(clickSquareColor)) {
-
-                }
-
-                for (int i = 0; i < whereToPress.length; i++) {
-                    utils.move(whereToPress[i]);
-                    utils.pressM1();
-                }
-                whereToPress = null;
-            }
-
         }
     }
 }
