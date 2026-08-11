@@ -1,6 +1,7 @@
 package org.example;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class ReactionTime extends RunnableSolver {
     public static void main(String[] args){
@@ -22,7 +23,10 @@ public class ReactionTime extends RunnableSolver {
 
     @Override
     public void run() {
-        utils.move(pressPoint);
+        BufferedImage initialFullScreen = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+        Rectangle workingArea = Utils.getWorkingArea(initialFullScreen);
+
+        utils.move(new Point(workingArea.x + workingArea.width/2, workingArea.y + workingArea.height/2));
         while (isActive()) {
             if (repeats == 0) {
                 halt();
