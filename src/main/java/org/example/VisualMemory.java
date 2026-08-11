@@ -82,12 +82,6 @@ public class VisualMemory extends RunnableSolver {
 
     Point[] whereToPress = null;
 
-
-
-    @Override
-    public void initialize() {
-    }
-
     static double requiredFillPercentage = 0.95;
 
     @Override

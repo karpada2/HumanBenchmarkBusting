@@ -18,10 +18,6 @@ public class ReactionTime extends RunnableSolver {
     int index = 0;
 
     @Override
-    public void initialize() {
-    }
-
-    @Override
     public void run() {
         BufferedImage initialFullScreen = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
         Rectangle workingArea = Utils.getWorkingArea(initialFullScreen);

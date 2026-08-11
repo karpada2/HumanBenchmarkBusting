@@ -100,7 +100,9 @@ public abstract class RunnableSolver {
     }
 
 
-    public abstract void initialize();
+    public void initialize() {
+
+    }
 
     public abstract void run();
 }
