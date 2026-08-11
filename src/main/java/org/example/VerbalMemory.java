@@ -16,7 +16,7 @@ public class VerbalMemory extends RunnableSolver {
     static int textAreaPadding = 10;
 
 
-    static boolean debug = true;
+    static boolean debug = false;
     Point debugStartPoint = new Point(1340, 597);
     Rectangle debugWorkingArea = new Rectangle(122, 178, 2407, 524);
 
@@ -55,20 +55,20 @@ public class VerbalMemory extends RunnableSolver {
         utils.move(idlePoint);
     }
 
-    public static int getSumOfRow(boolean[][] mask, int index) {
+    public static int getSumOfColumn(boolean[][] mask, int index) {
         int sum = 0;
-        for (int x = 0; x < mask[index].length; x++) {
-            if (mask[index][x]) {
+        for (int x = 0; x < mask.length; x++) {
+            if (mask[x][index]) {
                 sum++;
             }
         }
         return sum;
     }
 
-    public static ArrayList<Integer> getAllRowsSums(boolean[][] mask) {
-        Integer[] sums = new Integer[mask.length];
-        for (int i = 0; i < mask.length; i++) {
-            sums[i] = getSumOfRow(mask, i);
+    public static ArrayList<Integer> getAllColumnsSums(boolean[][] mask) {
+        Integer[] sums = new Integer[mask[0].length];
+        for (int i = 0; i < mask[0].length; i++) {
+            sums[i] = getSumOfColumn(mask, i);
         }
         return new ArrayList<>(Arrays.asList(sums));
     }
@@ -164,7 +164,7 @@ public class VerbalMemory extends RunnableSolver {
             Utils.saveImage(screenshot, "VerbalMemory");
             if (lastScoreAndLives == null || !Arrays.deepEquals(Utils.filterForColor(lastScoreAndLives, textColor), Utils.filterForColor(scoreAndLives, textColor))) {
                 BufferedImage words = screenshot.getSubimage(incomingWordsArea.x, incomingWordsArea.y, incomingWordsArea.width, incomingWordsArea.height);
-                ArrayList<Integer> sums = getAllRowsSums(Utils.filterForColor(words, textColor));
+                ArrayList<Integer> sums = getAllColumnsSums(Utils.filterForColor(words, textColor));
                 count++;
                 makeChoice(seenWords.contains(sums));
                 seenWords.add(sums);

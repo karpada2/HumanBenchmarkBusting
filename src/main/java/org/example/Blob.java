@@ -1,9 +1,7 @@
 package org.example;
 
 import java.awt.*;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Queue;
+import java.util.*;
 
 public class Blob {
     private Point[] containedPoints;
@@ -64,6 +62,51 @@ public class Blob {
         return points;
     }
 
+    public Blob merge(Blob other) {
+        if (other == null) {
+            return this;
+        }
+
+        Set<Point> combinedSet = new HashSet<>(Arrays.stream(other.containedPoints).toList());
+        combinedSet.addAll(Arrays.stream(this.containedPoints).toList());
+
+        Point[] empty = new Point[0];
+
+        return new Blob(combinedSet.toArray(empty));
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Blob) {
+            return equals((Blob)other);
+        }
+        return super.equals(other);
+    }
+
+    public boolean equals(Blob other) {
+        if (other.getMass() != this.getMass()) {
+            return false;
+        }
+
+        Point thisOrigin = new Point(boundingBox.x, boundingBox.y);
+        Point otherOrigin = new Point(other.boundingBox.x, other.boundingBox.y);
+
+        HashSet<Point> pointsCheck = new HashSet<>(this.getMass());
+
+        for (int i = 0; i < containedPoints.length; i++) {
+            pointsCheck.add(Utils.addPoints(containedPoints[i], otherOrigin));
+        }
+
+        for (int i = 0; i < other.containedPoints.length; i++) {
+            if (!pointsCheck.contains(Utils.addPoints(other.containedPoints[i], thisOrigin))) {
+                return false;
+            }
+            pointsCheck.remove(Utils.addPoints(other.containedPoints[i], thisOrigin));
+        }
+
+        return pointsCheck.isEmpty();
+    }
+
     public static Blob[] getBlobs(boolean[][] data, int minSize) {
         return getBlobs(data, minSize, true);
     }
@@ -120,5 +163,10 @@ public class Blob {
         catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "{Blob: center: " + getCenterOfMass().toString() + ", mass: " + getMass() + "}";
     }
 }

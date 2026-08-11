@@ -11,6 +11,7 @@ import java.io.IOException;
 public class Utils {
     static Color startButtonColor = new Color(255, 209, 84);
     static Color backgroundColor = new Color(43, 135, 209);
+    static Color textColor = new Color(255, 255, 255);
     Robot robot;
     Rectangle workinoArea = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
     public Utils(Robot robot) {
@@ -150,6 +151,18 @@ public class Utils {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 result[y][x] = image.getRGB(x, y) == convertedColor;
+            }
+        }
+        return result;
+    }
+
+    public static boolean[][] filterBrightness(BufferedImage image) {
+        int threshold = 200;
+        boolean[][] result = new boolean[image.getHeight()][image.getWidth()];
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                Color curr = new Color(image.getRGB(x, y));
+                result[y][x] = curr.getRed() > threshold && curr.getGreen() > threshold && curr.getBlue() > threshold;
             }
         }
         return result;
