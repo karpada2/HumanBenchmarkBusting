@@ -1,13 +1,10 @@
 package org.example;
 
-import org.w3c.dom.css.Rect;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
 
@@ -68,6 +65,20 @@ public class Utils {
 
     public static boolean equals(Point p1, Point p2, double tolerance) {
         return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)) < tolerance;
+    }
+
+
+
+
+    public static BufferedImage openImage(String taskName, String fileName) {
+        try {
+            File inFile = new File("/home/electrocaruzo/Pictures/HumanBenchmarkScreenshots/" + taskName + "/", fileName + ".png");
+
+            return ImageIO.read(inFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void saveImage(BufferedImage img, String taskName, String fileName) {
@@ -258,6 +269,16 @@ public class Utils {
         return actualResult;
     }
 
+    public static boolean[][] inverse(boolean[][] arr) {
+        boolean[][] result = new boolean[arr.length][arr[0].length];
+        for (int x = 0; x < result[0].length; x++) {
+            for (int y = 0; y < result.length; y++) {
+                result[y][x] = !arr[y][x];
+            }
+        }
+        return result;
+    }
+
     public static boolean[][] union(boolean[][] arr1, boolean[][] arr2) {
         boolean[][] result = new boolean[arr1.length][arr1[0].length];
         for (int x = 0; x < result[0].length; x++) {
@@ -355,7 +376,7 @@ public class Utils {
             image.setRGB(x, rectangle.y, Color.RED.getRGB());
         }
         for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
-            image.setRGB(rectangle.x + rectangle.width, y, Color.RED.getRGB());
+            image.setRGB(rectangle.x + rectangle.width - 1, y, Color.RED.getRGB());
             image.setRGB(rectangle.x, y, Color.RED.getRGB());
         }
 
