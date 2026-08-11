@@ -3,7 +3,7 @@ package org.example;
 import java.awt.*;
 
 public class ReactionTime extends RunnableSolver {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
         new ReactionTime().play();
     }
 
@@ -21,20 +21,18 @@ public class ReactionTime extends RunnableSolver {
     }
 
     @Override
-    public void start() {
-        utils.move(pressPoint);
-    }
-
-    @Override
     public void run() {
-        if (repeats == 0) {
-            halt();
-        }
-        if (utils.getPixelColorAtCursor().equals(waitForOrdered[index])) {
-            utils.pressM1();
-            index++;
-            index = index%waitForOrdered.length;
-            repeats--;
+        utils.move(pressPoint);
+        while (isActive()) {
+            if (repeats == 0) {
+                halt();
+            }
+            if (utils.getPixelColorAtCursor().equals(waitForOrdered[index])) {
+                utils.pressM1();
+                index++;
+                index = index%waitForOrdered.length;
+                repeats--;
+            }
         }
     }
 }
