@@ -66,6 +66,10 @@ public class Utils {
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
     }
 
+    public static boolean equals(Point p1, Point p2, double tolerance) {
+        return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)) < tolerance;
+    }
+
     public static void saveImage(BufferedImage img, String taskName, String fileName) {
         try {
             File outFile = new File("/home/electrocaruzo/Pictures/HumanBenchmarkScreenshots/" + taskName + "/", fileName + ".png");

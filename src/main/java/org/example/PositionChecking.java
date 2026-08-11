@@ -28,5 +28,8 @@ public class PositionChecking extends RunnableSolver {
     @Override
     public void run() {
 
+        while (isActive()) {
+
+        }
     }
 }
