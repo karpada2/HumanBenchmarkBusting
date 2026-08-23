@@ -20,6 +20,14 @@ public abstract class RunnableSolver {
     AtomicBoolean shouldHalt = new AtomicBoolean(false);
     AtomicBoolean shouldStart = new AtomicBoolean(false);
 
+    static AudioInputStream ais;
+    static Clip clip;
+
+    public static void playDing() {
+        clip.setFramePosition(0);
+        clip.start();
+    }
+
     public void play(){
         try {
             // Quiet down JNativeHook's verbose logging
@@ -48,14 +56,14 @@ public abstract class RunnableSolver {
                 }
             });
 
-            AudioInputStream ais = AudioSystem.getAudioInputStream(new File("src/main/resources/ding.wav"));
-            Clip clip = AudioSystem.getClip();
+            ais = AudioSystem.getAudioInputStream(new File("src/main/resources/ding.wav"));
+            clip = AudioSystem.getClip();
             clip.open(ais);
 
             FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
             gainControl.setValue(20f * (float) Math.log10(2));
 
-            clip.start();
+            playDing();
 
             innerInitialize();
             initialize();
@@ -65,14 +73,12 @@ public abstract class RunnableSolver {
                 Thread.sleep(10);
             }
 
-            clip.setFramePosition(0);
-            clip.start();
+            playDing();
 
             run();
 
             GlobalScreen.unregisterNativeHook();
-            clip.setFramePosition(0);
-            clip.start();
+            playDing();
 
 
             while (clip.getMicrosecondPosition() < clip.getMicrosecondLength()) {
