@@ -5,8 +5,8 @@ import java.util.*;
 
 public class Blob {
     private Point[] containedPoints;
-    private Point centerOfMass;
     private Rectangle boundingBox;
+    private boolean[][] mask;
     public Blob(Point[] points) {
         this.containedPoints = points;
         int xSum = 0;
@@ -38,11 +38,23 @@ public class Blob {
             xSum += containedPoints[i].x;
             ySum += containedPoints[i].y;
         }
-        centerOfMass = new Point(xSum/containedPoints.length, ySum/containedPoints.length);
+        mask = new boolean[boundingBox.height + 1][boundingBox.width + 1];
+        for (int i = 0; i < containedPoints.length; i++) {
+            mask[containedPoints[i].y - boundingBox.y][containedPoints[i].x - boundingBox.x] = true;
+        }
     }
 
     public Point getCenterOfMass() {
-        return centerOfMass;
+        double[] centroid = getCentroid();
+        return new Point(boundingBox.x + (int)centroid[0], boundingBox.y + (int)centroid[1]);
+    }
+
+    public int getCornerX() {
+        return boundingBox.x;
+    }
+
+    public int getCornerY() {
+        return boundingBox.y;
     }
 
     public int getMass() {
@@ -105,6 +117,88 @@ public class Blob {
         }
 
         return pointsCheck.isEmpty();
+    }
+
+    public double getMoment(int p, int q) {
+        double sum = 0;
+        for (int x = 0; x < mask[0].length; x++) {
+            for (int y = 0; y < mask.length; y++) {
+                if (mask[y][x]) {
+                    sum += Math.pow(x, p)*Math.pow(y, q);
+                }
+            }
+        }
+        return sum;
+    }
+
+    // arr[0] is x, arr[1] is y
+    public double[] getCentroid() {
+        double zeroMoment = getMoment(0, 0);
+        return new double[]{getMoment(1, 0)/zeroMoment, getMoment(0, 1)/zeroMoment};
+    }
+
+    public double getCentralMoment(int p, int q) {
+        double[] centroid = getCentroid();
+        double xBar = centroid[0];
+        double yBar = centroid[1];
+
+        double sum = 0;
+        for (int x = 0; x < mask[0].length; x++) {
+            for (int y = 0; y < mask.length; y++) {
+                if (mask[y][x]) {
+                    sum += Math.pow(x - xBar, p)*Math.pow(y - yBar, q);
+                }
+            }
+        }
+
+        return sum;
+    }
+
+    public double getEta(int p, int q) {
+        return getCentralMoment(p, q)/(Math.pow(getCentralMoment(0, 0), 1 + ((p + q)/2.0)));
+    }
+
+    public double[] getFeaturesAsMoments() {
+        return new double[]{
+                getEta(2, 0),
+                getEta(0, 2),
+                getEta(1, 1),
+                getEta(3, 0),
+                getEta(0, 3),
+                getEta(2, 1),
+                getEta(1, 2)
+        };
+    }
+
+    public double getBlobsSimilarity(Blob other) {
+        double[] myFeatures = getFeaturesAsMoments();
+        double[] otherFeatures = other.getFeaturesAsMoments();
+//        double epsilon = 0.0001; // prevents log func from doing shenanigans
+//        double distance = 0;
+        double dotProduct = 0;
+        double myLength = 0;
+        double otherLength = 0;
+
+        for (int i = 0; i < myFeatures.length; i++) {
+//            double x1 = Math.copySign(Math.log(Math.abs(myFeatures[i]) + epsilon), myFeatures[i]);
+//            double x2 = Math.copySign(Math.log(Math.abs(otherFeatures[i]) + epsilon), otherFeatures[i]);
+            double x1 = Math.log(myFeatures[i] + Math.sqrt(myFeatures[i]*myFeatures[i] + 1));
+            double x2 = Math.log(otherFeatures[i] + Math.sqrt(otherFeatures[i]*otherFeatures[i] + 1));
+//            distance += (x1 - x2)*(x1 - x2);
+            dotProduct += x1*x2;
+            myLength += x1*x1;
+            otherLength += x2*x2;
+        }
+
+//        distance = Math.sqrt(distance);
+//        return distance;
+
+        myLength = Math.sqrt(myLength);
+        otherLength = Math.sqrt(otherLength);
+
+        double cosineSimilarity = dotProduct/(myLength*otherLength);
+
+        return cosineSimilarity;
     }
 
     public static Blob[] getBlobs(boolean[][] data, int minSize) {

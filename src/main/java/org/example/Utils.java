@@ -7,6 +7,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Utils {
     static Color startButtonColor = new Color(255, 209, 84);
@@ -128,6 +132,74 @@ public class Utils {
 
     public static Color getColor(BufferedImage image, Point point) {
         return getColor(image, point.x, point.y);
+    }
+
+    public static void sortByRows(Blob[] blobs, int yTolerance) {
+        // 1. Sort by y first
+        Arrays.sort(blobs, Comparator.comparingInt(p -> p.getCornerY()));
+
+        // 2. Walk through and assign a "row id" whenever the gap exceeds tolerance
+        Map<Blob, Integer> rowOf = new HashMap<>();
+        int rowId = 0;
+        int rowAnchorY = blobs[0].getCornerY();
+        rowOf.put(blobs[0], rowId);
+
+        for (int i = 1; i < blobs.length; i++) {
+            if (blobs[i].getCornerY() - rowAnchorY > yTolerance) {
+                rowId++;
+                rowAnchorY = blobs[i].getCornerY(); // new row's reference point
+            }
+            rowOf.put(blobs[i], rowId);
+        }
+
+        // 3. Now sort by (rowId, x)
+        Arrays.sort(blobs, Comparator
+                .comparingInt((Blob blob) -> rowOf.get(blob))
+                .thenComparingInt(blob -> blob.getCornerX()));
+    }
+
+    // positive fill means higher than, negative means lower than
+    public static Blob[] filterBlobsByFillPercentage(Blob[] blobs, double fill) {
+        double[] fillPercentages = new double[blobs.length];
+        int count = 0;
+        for (int i = 0; i < blobs.length; i++) {
+            fillPercentages[i] = (double)blobs[i].getMass()/(blobs[i].getBoundingBox().width*blobs[i].getBoundingBox().height);
+            if (fill < 0) {
+                count += fillPercentages[i] <= -fill ? 1 : 0;
+            }
+            else {
+                count += fillPercentages[i] >= fill ? 1 : 0;
+            }
+        }
+        Blob[] result = new Blob[count];
+        int index = 0;
+        for (int i = 0; i < blobs.length; i++) {
+            if (fill < 0) {
+                if (fillPercentages[i] <= -fill) {
+                    result[index] = blobs[i];
+                    index++;
+                }
+            }
+            else {
+                if (fillPercentages[i] >= fill) {
+                    result[index] = blobs[i];
+                    index++;
+                }
+            }
+        }
+        return result;
+    }
+
+    public static int getClosestMatch(Blob[] options, Blob match) {
+        int maxIndex = 0;
+        double maxValue = match.getBlobsSimilarity(options[0]);
+        for (int i = 1; i < options.length; i++) {
+            if (match.getBlobsSimilarity(options[i]) > maxValue) {
+                maxIndex = i;
+                maxValue = match.getBlobsSimilarity(options[i]);
+            }
+        }
+        return maxIndex;
     }
 
     public static boolean any(boolean[][] data, int stepSize) {
@@ -402,6 +474,11 @@ public class Utils {
             image.setRGB(points[i].x, points[i].y, Color.CYAN.getRGB());
         }
 
+        return image;
+    }
+
+    public static BufferedImage drawPoint(BufferedImage image, Point point) {
+        image.setRGB(point.x, point.y, Color.GREEN.getRGB());
         return image;
     }
 }
