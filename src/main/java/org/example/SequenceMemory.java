@@ -77,11 +77,9 @@ public class SequenceMemory extends RunnableSolver {
     Point debugStartPoint = new Point(1313, 569);
     Rectangle debugWorkingArea = new Rectangle(68, 178, 2461, 524);
 
-    boolean debug = false;
-
     @Override
     public void run() {
-        if (!debug) {
+        if (!isDebug) {
             BufferedImage initialFullScreen = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             Rectangle workingArea = Utils.getWorkingArea(initialFullScreen);
 
