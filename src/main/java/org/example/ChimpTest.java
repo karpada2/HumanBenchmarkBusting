@@ -82,7 +82,6 @@ public class ChimpTest extends RunnableSolver {
     boolean pressedContinue = false;
 
     static Color boxColor = new Color(65, 147, 214);
-    static boolean debug = false;
 
     static Rectangle debugWorkingArea = new Rectangle(122, 178, 2407, 524);
     static Point debugStartPoint = new Point(1340, 594);
@@ -90,7 +89,7 @@ public class ChimpTest extends RunnableSolver {
 
     @Override
     public void run() {
-        if (!debug) {
+        if (!isDebug) {
             BufferedImage initialFullScreen = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             Rectangle workingArea = Utils.getWorkingArea(initialFullScreen);
 

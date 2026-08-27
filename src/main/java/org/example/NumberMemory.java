@@ -122,11 +122,9 @@ public class NumberMemory extends RunnableSolver {
 
     Point debugStartPoint = new Point(1340, 584);
     Rectangle debugWorkingArea = new Rectangle(122, 178, 2407, 524);
-
-    boolean debug = false;
     @Override
     public void run() {
-        if (!debug) {
+        if (!isDebug) {
             BufferedImage initialFullScreen = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             Rectangle workingArea = Utils.getWorkingArea(initialFullScreen);
 

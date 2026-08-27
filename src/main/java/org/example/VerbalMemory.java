@@ -16,7 +16,6 @@ public class VerbalMemory extends RunnableSolver {
     static int textAreaPadding = 10;
 
 
-    static boolean debug = false;
     Point debugStartPoint = new Point(1340, 597);
     Rectangle debugWorkingArea = new Rectangle(122, 178, 2407, 524);
 
@@ -76,7 +75,7 @@ public class VerbalMemory extends RunnableSolver {
 
     @Override
     public void run() {
-        if (!debug) {
+        if (!isDebug) {
             BufferedImage initialFullScreen = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             Rectangle workingArea = Utils.getWorkingArea(initialFullScreen);
 
