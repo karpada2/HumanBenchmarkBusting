@@ -219,8 +219,13 @@ public class Blob {
             }
         }
 
-        Blob[] empty = new Blob[0];
-        return blobs.toArray(empty);
+        Blob[] result = new Blob[blobs.size()];
+        blobs.sort(Comparator.comparing(Blob::getMass));
+        for (int i = 0; i < blobs.size(); i++) {
+            result[i] = blobs.get(blobs.size() - i - 1);
+        }
+
+        return result;
     }
 
     private static Blob getBlob(boolean[][] data, int x, int y, boolean[][] visited, boolean orthogonalOnly) {

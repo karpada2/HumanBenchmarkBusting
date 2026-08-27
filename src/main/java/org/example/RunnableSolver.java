@@ -23,7 +23,7 @@ public abstract class RunnableSolver {
     static AudioInputStream ais;
     static Clip clip;
 
-    boolean isDebug = false;
+    boolean isDebug = true;
 
     public static void playDing() {
         clip.setFramePosition(0);
