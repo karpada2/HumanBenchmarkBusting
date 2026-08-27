@@ -217,6 +217,29 @@ public class Utils {
         return any(data, 1);
     }
 
+    public static int countTrue(boolean[][] data) {
+        int count = 0;
+        for (int x = 0; x < data[0].length; x++) {
+            for (int y = 0; y < data.length; y++) {
+                if (data[y][x]) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public static double[] getHSV(Color color) {
+        float[] hsv = new float[3];
+        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsv);
+        double[] result = new double[3];
+        for (int i = 0; i < hsv.length; i++) {
+            result[i] = hsv[i];
+        }
+
+        return result;
+    }
+
     public static boolean[][] filterForColor(BufferedImage image, Color originalColor) {
         int convertedColor = originalColor.getRGB();
         boolean[][] result = new boolean[image.getHeight()][image.getWidth()];
